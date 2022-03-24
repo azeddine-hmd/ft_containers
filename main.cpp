@@ -12,7 +12,9 @@ int main() {
     vec.push_back(5);
     vec.push_back(6);
 
-    vec.resize(8);
+    vec.assign(5, 1);
+
+    vec.assign(8, 2);
 
     return 0;
 }
