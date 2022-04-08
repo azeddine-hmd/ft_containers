@@ -4,28 +4,28 @@
 
 namespace ft {
 
-    template<
-            typename Category,
-            typename T,
-            typename Distance = ptrdiff_t,
-            typename Pointer = T*,
-            typename Reference = T&
-    >
-    struct iterator {
-        typedef T                               value_type;
-        typedef Distance                        difference_type;
-        typedef Pointer                         pointer;
-        typedef Reference                       reference;
-        typedef Category                        iterator_category;
-    };
+//    template<
+//            typename Category,
+//            typename Iter,
+//            typename Distance = ptrdiff_t,
+//            typename Pointer = Iter*,
+//            typename Reference = Iter&
+//    >
+//    struct iterator {
+//        typedef Iter                               value_type;
+//        typedef Distance                        difference_type;
+//        typedef Pointer                         pointer;
+//        typedef Reference                       reference;
+//        typedef Category                        iterator_category;
+//    };
 
-    template<typename T>
+    template<typename Iter>
     struct iterator_traits {
-        typedef typename T::difference_type     difference_type;
-        typedef typename T::value_type          value_type;
-        typedef typename T::pointer             pointer;
-        typedef typename T::reference           reference;
-        typedef typename T::iterator_category   iterator_category;
+        typedef typename std::ptrdiff_t            difference_type;
+        typedef typename Iter::value_type          value_type;
+        typedef typename Iter::pointer             pointer;
+        typedef typename Iter::reference           reference;
+        typedef typename Iter::iterator_category   iterator_category;
     };
 
     template<typename T>
@@ -34,7 +34,7 @@ namespace ft {
         typedef T                               value_type;
         typedef T*                              pointer;
         typedef T&                              reference;
-        typedef std::forward_iterator_tag       iterator_category;
+        typedef std::random_access_iterator_tag iterator_category;
     };
 
     template<typename T>

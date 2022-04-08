@@ -82,7 +82,7 @@ namespace ft {
             first2++;
         }
 
-        return first2 != last2; //TODO: still not getting it
+        return first2 != last2;
     }
 
 } // namespace ft

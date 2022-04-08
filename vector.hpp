@@ -1,48 +1,169 @@
 #pragma once
 
 #include <algorithm>
+#include <iterator>
 #include "iterator_traits.hpp"
+#include "reverse_iterator.hpp"
 #include "utils.hpp"
+#include "is_integral.hpp"
+#include "enable_if.hpp"
 
 namespace ft {
+
+    template<typename Iter>
+    class VectorIter {
+    public:
+        typedef Iter                                                        iterator_type;
+        typedef typename iterator_traits<iterator_type>::iterator_category  iterator_category;
+        typedef typename iterator_traits<iterator_type>::value_type         value_type;
+        typedef typename iterator_traits<iterator_type>::difference_type    difference_type;
+        typedef typename iterator_traits<iterator_type>::pointer            pointer;
+        typedef value_type const *                                          const_pointer;
+        typedef typename iterator_traits<iterator_type>::reference          reference;
+        typedef value_type const &                                          const_reference;
+    private:
+        Iter m_pIter;
+    public:
+        VectorIter(): m_pIter(NULL) {}
+
+        VectorIter(pointer pIter): m_pIter(pIter) {}
+
+        VectorIter(VectorIter const &copy) {
+            *this = copy;
+        }
+
+        ~VectorIter() {}
+
+        VectorIter &operator=(VectorIter const &other) {
+            m_pIter = other.m_pIter;
+            return *this;
+        }
+
+        reference operator*() {
+            return *m_pIter;
+        }
+
+        const_reference operator*() const {
+            return *m_pIter;
+        }
+        pointer operator->() {
+            return m_pIter;
+        }
+        const_pointer operator->() const {
+            return m_pIter;
+        }
+        reference operator[](int val) {
+            return m_pIter[val];
+        }
+
+        const_reference operator[](int val) const {
+            return m_pIter[val];
+        }
+
+        VectorIter &operator++() {
+            m_pIter++;
+            return *this;
+        }
+
+        VectorIter operator++(int) {
+            VectorIter tmp = *this;
+            m_pIter++;
+            return tmp;
+        }
+
+        VectorIter &operator--() {
+            m_pIter--;
+            return *this;
+        }
+
+        VectorIter operator--(int) {
+            VectorIter tmp = *this;
+            m_pIter--;
+            return tmp;
+        }
+
+        VectorIter &operator+=(int value) {
+            m_pIter += value;
+            return *this;
+        }
+
+        VectorIter operator+(int value) const {
+            VectorIter tmp = *this;
+            return tmp += value;
+        }
+
+        VectorIter &operator-=(int value) {
+            m_pIter -= value;
+            return *this;
+        }
+
+        VectorIter operator-(int value) const {
+            VectorIter tmp = *this;
+            return tmp -= value;
+        }
+
+        difference_type operator-(VectorIter const &other) const {
+            return m_pIter - other.m_pIter;
+        }
+
+        bool operator==(VectorIter const &other) const {
+            return m_pIter == other.m_pIter;
+        }
+
+        bool operator!=(VectorIter const &other) const {
+            return m_pIter != other.m_pIter;
+        }
+
+        bool operator<(VectorIter const &other) const {
+            return m_pIter < other.m_pIter;
+        }
+
+        bool operator<=(VectorIter const &other) const {
+            return m_pIter <= other.m_pIter;
+        }
+
+        bool operator>(VectorIter const &other) const {
+            return m_pIter > other.m_pIter;
+        }
+
+        bool operator>=(VectorIter const &other) const {
+            return m_pIter >= other.m_pIter;
+        }
+    }; // class VectorIter
 
     template<typename T, typename Allocator = std::allocator<T> >
     class vector {
 
     public:
+        typedef T                                                       value_type;
+        typedef std::size_t                                             size_type;
+        typedef std::ptrdiff_t                                          difference_type;
 
-        typedef std::size_t size_type;
-        typedef T value_type;
-        typedef Allocator allocator_type;
-        typedef std::ptrdiff_t difference_type;
+        typedef Allocator                                               allocator_type;
+        typedef typename allocator_type::reference                      reference;
+        typedef typename allocator_type::const_reference                const_reference;
+        typedef typename allocator_type::pointer                        pointer;
+        typedef typename allocator_type::const_pointer                  const_pointer;
 
-        typedef typename allocator_type::reference reference;
-        typedef typename allocator_type::const_reference const_reference;
-        typedef typename allocator_type::pointer pointer;
-        typedef typename allocator_type::const_pointer const_pointer;
-
+        typedef typename ft::VectorIter<pointer>                        iterator;
+        typedef typename ft::VectorIter<const_pointer>                  const_iterator;
+        typedef typename ft::reverse_iterator<value_type >              reverse_iterator;
+        typedef typename ft::reverse_iterator<value_type const>         const_reverse_iterator;
     private:
-
-        allocator_type m_alloc;
-        value_type *m_valptr;
-        size_type m_size;
-        size_type m_capacity;
-
-        void clean() {
-            clear();
-            m_alloc.deallocate(m_valptr, m_capacity);
-        }
-
+        allocator_type  m_alloc;
+        pointer         m_valptr;
+        size_type       m_size;
+        size_type       m_capacity;
     public:
 
-        vector(allocator_type const &alloc = allocator_type()) {
+        explicit vector(allocator_type const &alloc = allocator_type()) {
             m_alloc = alloc;
             m_size = 0;
             m_capacity = 0;
             m_valptr = NULL;
         }
 
-        vector(size_type n,
+        explicit vector(size_type n,
                value_type const &val = value_type(),
                allocator_type const &alloc = allocator_type()
         ) {
@@ -55,11 +176,24 @@ namespace ft {
             }
         }
 
-        vector(vector<T, Allocator> const &copy) {
+        template<typename InputIt>
+        vector (
+                InputIt first,
+                InputIt last,
+                allocator_type const &alloc = allocator_type(),
+                typename enable_if< !is_integral<InputIt>::value, InputIt>::type* = NULL
+        ) {
+            m_capacity = 0;
+            m_alloc = alloc;
+            reserve(ft::distance(first, last));
+            initIterRange(first, last);
+        }
+
+        vector(vector const &copy) {
             *this = copy;
         }
 
-        vector<T, Allocator> &operator=(vector<T, Allocator> const &rhs) {
+        vector &operator=(vector const &rhs) {
             if (this != &rhs) {
                 clean();
                 m_size = rhs.m_size;
@@ -87,8 +221,8 @@ namespace ft {
         }
 
         void pop_back(void) {
-            if (m_size) {
-                m_alloc.destroy(&m_valptr[m_size--]);
+            if (m_size && m_capacity) {
+                m_alloc.destroy(&m_valptr[--m_size]);
             }
         }
 
@@ -117,10 +251,10 @@ namespace ft {
                 pointer newValptr;
                 newValptr = m_alloc.allocate(n);
                 for (size_type i = 0; i < m_size; i++) {
-                    m_alloc.construct(&newValptr[i], &m_valptr[i]);
+                    m_alloc.construct(&newValptr[i], m_valptr[i]);
                     m_alloc.destroy(&m_valptr[i]);
                 }
-                m_alloc.deallocate(m_valptr);
+                m_alloc.deallocate(m_valptr, m_capacity);
                 m_capacity = n;
                 m_valptr = newValptr;
             }
@@ -134,6 +268,35 @@ namespace ft {
             for (size_type i = 0; i < n; i++)
                 m_alloc.construct(&m_valptr[i], val);
             m_size = n;
+        }
+
+        template <class InputIt>
+        void assign (
+                InputIt first,
+                InputIt last,
+                typename std::enable_if< !std::is_integral<InputIt>::value, InputIt >::type* = NULL
+        ) {
+            clear();
+            reserve(ft::distance(first, last));
+            initIterRange(first, last);
+        }
+
+        iterator insert(iterator position, const value_type& val) {
+            difference_type pos = position - begin();
+            size_type element_to_move = end() - position;
+            ft::vector<T> tmp;
+
+            tmp.assign(position, end());
+
+            if (m_size + 1 > m_capacity) {
+                reserve(m_capacity * 2);
+            }
+            resize(m_size - element_to_move);
+            push_back(val);
+            for (size_type i = 0; i < element_to_move; i++) {
+                push_back(tmp[i]);
+            }
+            return begin() + pos;
         }
 
         void swap (reference x){
@@ -212,5 +375,53 @@ namespace ft {
             return m_valptr[0];
         }
 
+        iterator	begin() {
+            return iterator(&m_valptr[0]);
+        }
+
+        const_iterator begin() const {
+            return const_iterator(&m_valptr[0]);
+        }
+
+        iterator	end() {
+            return iterator(&m_valptr[m_size]);
+        }
+
+        const_iterator end() const {
+            return const_iterator(&m_valptr[m_size]);
+        }
+
+        reverse_iterator rbegin() {
+            return reverse_iterator(end());
+        }
+
+        reverse_iterator rend() {
+            return  reverse_iterator(this->begin());
+        }
+
+        const_reverse_iterator rbegin() const {
+            return const_reverse_iterator(end());
+        }
+
+        const_reverse_iterator rend() const {
+            return const_reverse_iterator(begin());
+        }
+
+    private:
+
+        void clean() {
+            clear();
+            m_alloc.deallocate(m_valptr, m_capacity);
+        }
+
+        template<typename InputIt>
+        void initIterRange(InputIt first, InputIt last) {
+            while (first != last) {
+                push_back(*first++);
+            }
+        }
+
     }; // class vector
+
+
 } // namespace ft
