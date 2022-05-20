@@ -274,7 +274,7 @@ namespace ft {
         void assign (
                 InputIt first,
                 InputIt last,
-                typename std::enable_if< !std::is_integral<InputIt>::value, InputIt >::type* = NULL
+                typename enable_if< !is_integral<InputIt>::value, InputIt >::type* = NULL
         ) {
             clear();
             reserve(ft::distance(first, last));

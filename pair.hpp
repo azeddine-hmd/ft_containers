@@ -26,7 +26,8 @@ namespace ft {
         ~pair() {
         }
 
-        pair&   operator=( pair const& rhs )
+        template<typename U1, typename U2>
+        pair&   operator=( pair<U1, U2> const& rhs )
         {
             first = rhs.first;
             second = rhs.second;
@@ -37,39 +38,47 @@ namespace ft {
     };// class pair
 
     template<typename T1, typename T2>
-    bool    operator==( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator==( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return lhs.first == rhs.first && lhs.second == rhs.second;
     }
 
     template<typename T1, typename T2>
-    bool    operator!=( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator!=( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return !(lhs == rhs);
     }
 
     template<typename T1, typename T2>
-    bool    operator<( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator<( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return lhs.first < rhs.first || (!(rhs.first < lhs.first) && lhs.second < rhs.second);
     }
 
     template<typename T1, typename T2>
-    bool    operator<=( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator<=( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return !(rhs < lhs);
     }
 
     template<typename T1, typename T2>
-    bool    operator>( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator>( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return rhs < lhs;
     }
 
     template<typename T1, typename T2>
-    bool    operator>=( pair<T1,T2> const& lhs, pair<T1,T2> const& rhs ) {
+    bool    operator>=( ft::pair<T1,T2> const& lhs, ft::pair<T1,T2> const& rhs ) {
         return !(lhs < rhs);
     }
 
-    template<typename T1,typename T2>
-    pair<T1, T2>    make_pair(T1 x, T2 y)
-    {
-        return pair<T1, T2>(x,y);
-    }
+
+template<typename T1,typename T2>
+pair<T1, T2>    make_pair(T1 x, T2 y)
+{
+    return pair<T1, T2>(x,y);
+}
 
 }// namespace ft
+
+template<typename T1, typename T2>
+std::ostream&   operator<<( std::ostream& out, ft::pair<T1, T2> const& obj ) {
+    out << " [ first: " << obj.first << " , second: " << obj.second << " ] " << std::endl;
+
+    return out;
+}
