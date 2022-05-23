@@ -37,3 +37,4 @@ tags
 Session.vim
 .idea/
 *.dSYM/
+debug
