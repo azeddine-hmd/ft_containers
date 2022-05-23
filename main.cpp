@@ -86,32 +86,38 @@ int main() {
     }
 
     {
-        AvlTree tree;
-        PairType pair0(0, "pair0");
-        PairType pair1(1, "pair1");
-        PairType pair2(2, "pair2");
-        PairType pair3(3, "pair3");
-        PairType pair4(4, "pair4");
-        PairType pair5(-1, "pair5");
-        PairType pair6(-300, "pair6");
-        PairType pair7(7, "pair7");
-        PairType pair10(10, "pair10");
-
-        std::cout << ((pair1 < pair0) ? "true" : "false") << std::endl;
-
-        tree.insert(pair0);
-        tree.insert(pair1);
-        tree.insert(pair2);
-        tree.insert(pair3);
-        tree.insert(pair4);
-        tree.insert(pair5);
-        tree.insert(pair6);
-        tree.insert(pair10);
-        tree.insert(pair7);
-
-        tree.balanceFeedback(tree.getRoot());
-        std::cout << "reached" << std::endl;
+//        AvlTree tree;
+//        PairType pair0(0, "pair0");
+//        PairType pair1(1, "pair1");
+//        PairType pair2(2, "pair2");
+//        PairType pair3(3, "pair3");
+//        PairType pair4(4, "pair4");
+//        PairType pair5(-1, "pair5");
+//        PairType pair6(-300, "pair6");
+//        PairType pair7(7, "pair7");
+//        PairType pair10(10, "pair10");
+//
+//        //std::cout << ((pair1 < pair0) ? "true" : "false") << std::endl;
+//
+//        tree.insert(pair0);
+//        tree.insert(pair1);
+//        tree.insert(pair2);
+//        tree.insert(pair3);
+//        tree.insert(pair4);
+//        tree.insert(pair5);
+//        tree.insert(pair6);
+//        tree.insert(pair10);
+//        tree.insert(pair7);
+//
+//        tree.balanceFeedback(tree.getRoot());
+//        std::cout << "reached" << std::endl;
     }
+
+//    std::map<int, std::string> maper;
+//    maper.insert(std::make_pair(1, "first"));
+//
+//    std::map<int, std::string>::iterator iter = maper.begin();
+//    std::map<int, std::string>::iterator()
 
     return 0;
 }

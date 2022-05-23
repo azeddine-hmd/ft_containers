@@ -5,29 +5,21 @@
 
 namespace ft {
 
-    template<typename T,
+    template<
+            typename T,
             typename Alloc = std::allocator<T>
-            >
-    class AvlNode {
+    >
+    struct AvlNode {
+
+    typedef T   value_type;
 
     public:
-
-        typedef T   value_type;
+        T*          m_val;
         AvlNode*    m_parent;
         AvlNode*    m_right;
         AvlNode*    m_left;
-
-    private:
-
         Alloc       m_alloc;
-        T*          m_val;
         int         m_height;
-
-    private:
-
-        AvlNode()  {
-
-        }
 
     public:
 
@@ -56,11 +48,6 @@ namespace ft {
             return m_height;
         }
 
-        T const&    getValue() const {
-            if (!m_val) throw std::runtime_error("value is null");
-            return *m_val;
-        }
-
         int getBalanceFactor() const {
             if (!m_left && !m_right) {
                 return 0;
@@ -73,47 +60,10 @@ namespace ft {
             }
         }
 
-        void addLeftNode( AvlNode* node ) {
-            if (m_left)
-                throw std::runtime_error("left node already exist");
-            else if (node->m_parent)
-                throw std::runtime_error("parent node already exist");
-
-            m_left = node;
-            node->m_parent = this;
-            updateHeight();
-        }
-
-        void addRightNode( AvlNode* node ) {
-            if (m_right)
-                throw std::runtime_error("right node already exist");
-            m_right = node;
-            if (node->m_parent)
-                throw std::runtime_error("added node already have parent");
-            node->m_parent = this;
-            updateHeight();
-        }
-
-        bool haveLeftNode() const {
-            return m_left;
-        }
-
-        bool haveRightNode() const {
-            return m_right;
-        }
-
-        AvlNode *getRightNode() const {
-            return m_right;
-        }
-
-        AvlNode *getLeftNode() const {
-            return m_left;
-        }
-
-        bool    isBalanced() const {
-            int blcFactor = getBalanceFactor();
-            return (blcFactor == -1 || blcFactor == 0 || blcFactor == 1);
-        }
+//        bool    isBalanced() const {
+//            int blcFactor = getBalanceFactor();
+//            return (blcFactor == -1 || blcFactor == 0 || blcFactor == 1);
+//        }
 
         void updateHeight() {
             if (!m_left && !m_right) {
@@ -129,25 +79,67 @@ namespace ft {
             if (m_parent) m_parent->updateHeight();
         }
 
-        void destroy() {
-            if (!m_val)
+        //TODO: move it to tree; plus what the heck is this ??
+//        void destroy() {
+//            if (!m_val)
+//                return;
+//            m_alloc.destroy(m_val);
+//            m_alloc.deallocate(m_val, 1);
+//            m_left->destroy();
+//            m_left = NULL;
+//            m_right->destroy();
+//            m_right = NULL;
+//            m_parent = NULL;
+//            m_height = 0;
+//        }
+
+        AvlNode* next() {
+            AvlNode * curr = this;
+
+            if (!curr) {
                 return;
-            m_alloc.destroy(m_val);
-            m_alloc.deallocate(m_val, 1);
-            m_left->destroy();
-            m_left = NULL;
-            m_right->destroy();
-            m_right = NULL;
-            m_parent = NULL;
-            m_height = 0;
+            }
+
+            if (!m_right) {
+                AvlNode * parent = m_parent;
+                while (parent && parent->m_right && curr->m_val->first == parent->m_right->m_val->first) {
+                    curr = parent;
+                    parent = parent->m_parent;
+                }
+                curr = parent;
+            } else {
+                curr = m_right;
+                while (curr->haveLeftNode())
+                    curr = curr->m_left;
+            }
+
+            return curr;
         }
 
         AvlNode* previous() {
-            AvlNode * parent;
+            AvlNode * curr = this;
+
             if (!m_left) {
-                parent = m_parent;
+                AvlNode * parent = m_parent;
+                while (parent && parent->m_left && curr->m_val->first == parent->m_left->m_val->first) {
+                    curr = parent;
+                    parent = parent->m_parent;
+                }
+                curr = parent;
+            } else {
+                curr = m_left;
+                while (curr->m_right)
+                    curr = curr->m_right;
             }
-            //TODO: so what next?
+
+            return curr;
+        }
+
+        AvlNode* getRoot() {
+            AvlNode * root = this;
+            while (root && root->haveParentNode())
+                root = root->haveParentNode();
+            return root;
         }
 
     }; // class AvlNode
@@ -166,9 +158,8 @@ namespace ft {
 
     private:
         node_allocator      m_nodeAlloc;
-        Compare             cmp;
+        Compare             key_compare;
         Node*               m_root;
-        bool                m_isFound;
 
     private:
         Node*   makeNode( T const& val ) {
@@ -180,15 +171,15 @@ namespace ft {
         Node* insertNode( Node* current, Node* newNode ) {
             if (!current)
                 return newNode;
-            if (!cmp(newNode->getValue(), current->getValue())) {
+            if (!cm(newNode->m_val->first, current->m_val->first)) {
                 current->m_right = insertNode(current->m_right, newNode);
                 current->m_right->m_parent = current;
-            } else if (cmp(newNode->getValue(), current->getValue())) {
+            } else if (key_compare(newNode->m_val->first, current->m_val->first)) {
                 current->m_left = insertNode(current->m_left, newNode);
                 current->m_left->m_parent = current;
             }
 
-            return balanceNode(m_root, newNode->getValue());
+            return balanceTree(current, newNode->m_val);
         }
 
         Node* rotateLeft( Node* x ) {
@@ -233,23 +224,25 @@ namespace ft {
             return x;
         }
 
-        Node* balanceNode( Node* current, const typename Node::value_type val ) {
+        Node* balanceTree( Node* current, typename Node::value_type const val ) {
             int balanceFactor = current->getBalanceFactor();
+
             if (balanceFactor > 1) {
-                if (cmp(val, current->getLeftNode()->getValue())) {
+                if (key_compare(val.first, current->getLeftNode()->m_val->first)) {
                     return rotateRight(current);
                 } else {
                     rotateLeft(current->getLeftNode());
                     return rotateRight(current);
                 }
             } else if (balanceFactor < -1) {
-                if (!cmp(val, current->getRightNode()->getValue())) {
+                if (!key_compare(val.first, current->getRightNode()->getValue().first)) {
                     return rotateLeft(current);
                 } else {
                     rotateRight(current->getRightNode());
                     return rotateLeft(current);
                 }
             }
+
             return current;
         }
 
@@ -262,6 +255,14 @@ namespace ft {
             m_root = makeNode(val);
         }
 
+        AvlTree(AvlTree* root): m_root(root) {
+
+        }
+
+        ~AvlTree() {
+
+        }
+
         AvlTree& operator=( AvlTree const& rhs ) {
             m_root = rhs.m_root;
             return *this;
@@ -269,7 +270,7 @@ namespace ft {
 
         void insert( T const& val ) {
             if (m_root) {
-                insertNode(m_root, makeNode(val));
+                m_root = insertNode(m_root, makeNode(val));
             } else {
                 m_root = makeNode(val);
             }
@@ -279,7 +280,7 @@ namespace ft {
             if (!current || current->getValue().first == val.first) {
                 return current;
             }
-            if (!cmp(val, m_root->getValue())) {
+            if (!key_compare(val.first, current->getValue().first)) {
                 return find(current->m_right, val);
             } else {
                 return find(current->m_left, val);
@@ -308,6 +309,7 @@ namespace ft {
             return max;
         }
 
+        //TODO: only for debugging
         void balanceFeedback( Node* current ) {
             if (current->haveLeftNode())
                 balanceFeedback(current->getLeftNode());
@@ -318,17 +320,69 @@ namespace ft {
             //}
         }
 
-        Node* getRoot() const {
-            return m_root;
+        Node* del( Node* node, value_type const& val,  bool& is_found ) {
+            if (!node)
+                return NULL;
+
+            if (val.first == node->getValue().first) {
+                is_found = true;
+                // node have only one child right or left
+                if (!node->haveRightNode() || !node->haveLeftNode()) {
+                    Node * tmp = node->m_right ? node->m_right : node->m_left;
+
+                    // node have no child
+                    if (!tmp) {
+                        tmp = node;
+                        node = NULL;
+                    } else {
+                        // node have one child
+                        Node * nodeParent = node->m_parent;
+                        *node = *tmp;
+                        node->m_parent = nodeParent;
+                    }
+                    m_nodeAlloc.destroy(tmp->m_val);
+                    m_nodeAlloc.deallocate(tmp->m_val, 1);
+                    m_nodeAlloc.deallocate(tmp, 1);
+                } else {
+                    // node has two children
+                    Node * min = findMin(node->m_right);
+                    value_type* tmp = node->value;
+                    node->m_val = min->m_val;
+                    min->m_val = tmp;
+                    m_nodeAlloc.construct(min->m_val, *(node->m_val));
+                    node->m_right = del(node->m_right, *(node->m_val), is_found);
+                }
+            }  else if (!key_compare(val.first, node->m_val->first)) {
+                node->right = del(node->right, val, is_found);
+            } else {
+                node->left = del(node->left, val, is_found);
+            }
+
+            if (node == NULL)
+                return NULL;
+
+            return balanceTree(node, val);
         }
+
+        bool erase( value_type const& val ) {
+            bool is_found = false;
+            m_root = del(m_root, val, is_found);
+            return is_found;
+        }
+
+        Alloc getAllocator() const {
+            return m_nodeAlloc;
+        }
+
     };// class AvlTree
 
 }// namespace ft
 
 
+//TODO: only for debugging
 template<typename T1, typename T2>
 std::ostream&   operator<<( std::ostream& out, ft::AvlNode<T1, T2> const& obj ) {
-    out << "[ height: " << obj.getHeight() << " , balance factor: " << obj.getBalanceFactor() << " , value: " << obj.getValue() << " ]" << std::endl;
+    out << "[ height: " << obj.getHeight() << " , balance factor: " << obj.getBalanceFactor() << " , value: " << obj.m_val << " ]" << std::endl;
 
     return out;
 }

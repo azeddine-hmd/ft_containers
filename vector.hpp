@@ -26,7 +26,9 @@ namespace ft {
     public:
         VectorIter(): m_pIter(NULL) {}
 
-        VectorIter(pointer pIter): m_pIter(pIter) {}
+        VectorIter(pointer pIter): m_pIter(pIter) {
+
+        }
 
         VectorIter(VectorIter const &copy) {
             *this = copy;
@@ -129,9 +131,13 @@ namespace ft {
         bool operator>=(VectorIter const &other) const {
             return m_pIter >= other.m_pIter;
         }
+
     }; // class VectorIter
 
-    template<typename T, typename Allocator = std::allocator<T> >
+    template<
+          typename T,
+          typename Allocator = std::allocator<T>
+    >
     class vector {
 
     public:
@@ -147,23 +153,40 @@ namespace ft {
 
         typedef typename ft::VectorIter<pointer>                        iterator;
         typedef typename ft::VectorIter<const_pointer>                  const_iterator;
-        typedef typename ft::reverse_iterator<value_type >              reverse_iterator;
-        typedef typename ft::reverse_iterator<value_type const>         const_reverse_iterator;
+        typedef typename ft::reverse_iterator<iterator>                 reverse_iterator;
+        typedef typename ft::reverse_iterator<const_iterator>           const_reverse_iterator;
+
     private:
         allocator_type  m_alloc;
         pointer         m_valptr;
         size_type       m_size;
         size_type       m_capacity;
+
+    private:
+        void clean() {
+            clear();
+            m_alloc.deallocate(m_valptr, m_capacity);
+        }
+
+        template<typename InputIt>
+        void initIterRange( InputIt first, InputIt last ) {
+            while (first != last) {
+                push_back(*first++);
+            }
+        }
+
+
     public:
 
-        explicit vector(allocator_type const &alloc = allocator_type()) {
+        explicit vector( allocator_type const &alloc = allocator_type() ) {
             m_alloc = alloc;
             m_size = 0;
             m_capacity = 0;
             m_valptr = NULL;
         }
 
-        explicit vector(size_type n,
+        explicit vector(
+                size_type n,
                value_type const &val = value_type(),
                allocator_type const &alloc = allocator_type()
         ) {
@@ -189,11 +212,11 @@ namespace ft {
             initIterRange(first, last);
         }
 
-        vector(vector const &copy) {
+        vector( vector const &copy ) {
             *this = copy;
         }
 
-        vector &operator=(vector const &rhs) {
+        vector &operator=( vector const &rhs ) {
             if (this != &rhs) {
                 clean();
                 m_size = rhs.m_size;
@@ -211,7 +234,7 @@ namespace ft {
             clean();
         }
 
-        void push_back(const_reference val) {
+        void push_back( const_reference val ) {
             if (m_capacity == 0) {
                 reserve(1);
             } else if (m_size + 1 > m_capacity) {
@@ -220,13 +243,13 @@ namespace ft {
             m_valptr[m_size++] = val;
         }
 
-        void pop_back(void) {
+        void pop_back() {
             if (m_size && m_capacity) {
                 m_alloc.destroy(&m_valptr[--m_size]);
             }
         }
 
-        void resize(size_type n, value_type val = value_type()) {
+        void resize( size_type n, value_type val = value_type() ) {
             if (n < m_size) {
                 for (size_type i = n; i < m_size; i++)
                     m_alloc.destroy(&m_valptr[i]);
@@ -244,7 +267,7 @@ namespace ft {
         }
 
 
-        void reserve(size_type n) {
+        void reserve( size_type n ) {
             if (n > max_size()) {
                 throw std::length_error("ft::vector: new capacity exceeds ram max length");
             } else if (n > m_capacity) {
@@ -260,7 +283,7 @@ namespace ft {
             }
         }
 
-        void assign(size_type n, const_reference val) {
+        void assign( size_type n, const_reference val ) {
             if (n > m_capacity)
                 reserve(n);
             for (size_type i = 0; i < m_size; i++)
@@ -281,7 +304,7 @@ namespace ft {
             initIterRange(first, last);
         }
 
-        iterator insert(iterator position, const value_type& val) {
+        iterator insert( iterator position, const value_type& val ) {
             difference_type pos = position - begin();
             size_type element_to_move = end() - position;
             ft::vector<T> tmp;
@@ -299,7 +322,7 @@ namespace ft {
             return begin() + pos;
         }
 
-        void swap (reference x){
+        void swap( reference x ){
             pointer   tmpValptr = m_valptr;
             size_type tmpSize = m_size;
             size_type tmpCapacity = m_capacity;
@@ -333,7 +356,7 @@ namespace ft {
             return m_capacity;
         }
 
-        bool empty(void) const {
+        bool empty() const {
             return m_size == 0;
         }
 
@@ -345,7 +368,7 @@ namespace ft {
             return m_valptr[n];
         }
 
-        const_reference operator[](size_type n) const {
+        const_reference operator[]( size_type n ) const {
             return m_valptr[n];
         }
 
@@ -357,12 +380,12 @@ namespace ft {
             return m_valptr[m_size - 1];
         }
 
-        reference at(size_type n) {
+        reference at( size_type n ) {
             if (n >= m_size) throw std::out_of_range("ft::vector: element's out of bounds");
             return m_valptr[n];
         }
 
-        const_reference at(size_type n) const {
+        const_reference at( size_type n ) const {
             if (n >= m_size) throw std::out_of_range("ft::vector: element's out of bounds");
             return m_valptr[n];
         }
@@ -405,20 +428,6 @@ namespace ft {
 
         const_reverse_iterator rend() const {
             return const_reverse_iterator(begin());
-        }
-
-    private:
-
-        void clean() {
-            clear();
-            m_alloc.deallocate(m_valptr, m_capacity);
-        }
-
-        template<typename InputIt>
-        void initIterRange(InputIt first, InputIt last) {
-            while (first != last) {
-                push_back(*first++);
-            }
         }
 
     }; // class vector
