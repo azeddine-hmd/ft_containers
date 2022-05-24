@@ -162,19 +162,6 @@ namespace ft {
         size_type       m_size;
         size_type       m_capacity;
 
-    private:
-        void clean() {
-            clear();
-            m_alloc.deallocate(m_valptr, m_capacity);
-        }
-
-        template<typename InputIt>
-        void initIterRange( InputIt first, InputIt last ) {
-            while (first != last) {
-                push_back(*first++);
-            }
-        }
-
 
     public:
 
@@ -428,6 +415,19 @@ namespace ft {
 
         const_reverse_iterator rend() const {
             return const_reverse_iterator(begin());
+        }
+
+    private:
+        void clean() {
+            clear();
+            m_alloc.deallocate(m_valptr, m_capacity);
+        }
+
+        template<typename InputIt>
+        void initIterRange( InputIt first, InputIt last ) {
+            while (first != last) {
+                push_back(*first++);
+            }
         }
 
     }; // class vector
