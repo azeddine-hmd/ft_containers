@@ -31,11 +31,11 @@ namespace ft {
         }
 
         value_type& top() {
-            return c.pop_back();
+            return c.back();
         }
 
         value_type const& top() const {
-            return c.pop_back();
+            return c.back();
         }
 
         void pop() {

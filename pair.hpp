@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 namespace ft {
 
     template<typename T1, typename T2>
@@ -19,8 +21,8 @@ namespace ft {
         }
 
         template<typename U1, typename U2>
-        pair( pair<U1, U2> const& copy ) {
-            *this = copy;
+        pair( pair<U1, U2> const& copy ): first(copy.first), second(copy.second) {
+
         }
 
         ~pair() {
